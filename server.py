@@ -34,6 +34,14 @@ load_dotenv()
 app = FastAPI()
 
 openai.api_key = os.environ['OPENAI_API_KEY']
+deployment_id = None
+
+if "OPENAI_API_TYPE" in os.environ:
+    openai.api_type = os.environ['OPENAI_API_TYPE'] 
+    openai.api_base = os.environ['OPENAI_API_BASE']
+    openai.api_version = os.environ['OPENAI_API_VERSION']
+    deployment_id = os.environ['DEPLOYMENT_NAME']
+
 DEFAULT_TEMPERATURE = 0.7
 DEFAULT_MAX_TOKENS = 100
 
@@ -43,6 +51,7 @@ class RequestBody(BaseModel):
 
 async def get_openai_stream_data(request):
     events = await openai.ChatCompletion.acreate(
+        deployment_id=deployment_id,
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": request.inputs}],
         stream=True,
